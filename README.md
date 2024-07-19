@@ -26,7 +26,7 @@ python3 SerialMidiBridge.py
 This requires some python extra packages. You can install them as follows:
 
 ```
-pip install pyserial python-rtmidi pysimplegui
+pip install pyserial python-rtmidi customtkinter
 ```
 
 ### Adapting/building
@@ -44,11 +44,13 @@ pip install pyinstaller
 ```
 
 You are free to modify it as long as it's not for commercial purposes.
+You are free to modify it as long as it's not for commercial purposes.
 
-### Notes
+### New Changes...
 
-Due to the use of [PySimpleGui](https://pypi.org/project/PySimpleGUI/) there are some cosmetic 'features':
+Switched from PySimpleGUI to customtkinter due to licensing changes
 
-- There is extra space after all texts because the width in characters is set for a non-proportional font.
-- After re-scanning for ports it might be that the baudrate selection is not resized.
-- When the previously used serial port is not available at startup its name might still be in the selection box.
+The project now uses the "customtkinter" library instead of "PySimpleGUI." This change was made because PySimpleGUI has introduced a free trial period, which affects the project's goal of remaining completely free.
+
+Note: The current structure may not be highly professional or organized. Feel free to rearrange and improve the code as needed.
+

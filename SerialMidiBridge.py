@@ -1,21 +1,19 @@
-import time
 import queue
 import rtmidi
 import serial
 import serial.tools.list_ports
 import threading
 import logging
-import sys
 import time
-import PySimpleGUI as sg
+import customtkinter
 # 2021-03-26 Ruud Mulder
 # Gui version of the Serial MIDI Bridge script from https://github.com/raspy135/serialmidi.
 # The functionality is the serialmidi script, I just added the Gui.
 #
 # N.B. midiin = MIDI to Serial; midiout = Serial to MIDI
+
 bridgeActive = False # set to True when bridge is active
 logging.basicConfig(level = logging.DEBUG) # output all messages
-myfont = 'Any 12'
 midi_ready = False
 midiin_message_queue = queue.Queue()
 midiout_message_queue = queue.Queue()
@@ -24,9 +22,28 @@ midiin      = rtmidi.MidiIn()
 midiout     = rtmidi.MidiOut()
 midiinPort  = ''
 midioutPort = ''
+enabled = True
+
+customtkinter.set_appearance_mode("dark")
+customtkinter.set_default_color_theme("dark-blue")
+
+app = customtkinter.CTk()
+
+
+font = customtkinter.CTkFont(size=20, weight="normal")
+
 
 def popupError(s):
-    sg.popup_error(s, font=myfont)
+    dialog = customtkinter.CTkToplevel()
+    dialog.title("Error")
+
+    dialog.columnconfigure(0, weight = 1)
+    dialog.rowconfigure(0, weight = 1)
+
+    label = customtkinter.CTkLabel(dialog, text=s)
+    label.grid(row=0, column=0, padx=20, pady=20)
+
+
 
 def get_midi_length(message):
     if len(message) == 0:
@@ -121,8 +138,8 @@ def startSerialMidiServer(serial_port_name, serial_baud, portIn, portOut):
         midi_ready  = True
         midiin.ignore_types(sysex = False, timing = False, active_sense = False)
         midiin.set_callback(midi_input_handler(midiinPort))
-    except serial.serialutil.SerialException:
-        popupError("Serial port opening error.")
+    except serial.serialutil.SerialException as se:
+        popupError("Serial port opening error." + se)
         ok = False
 
     if ok:
@@ -174,16 +191,18 @@ getMidiPorts()
 #TODO: start/stopSerialMidiServer working: no messages yet.
 #TODO: add message OutputElement
 # make components for Gui
-wc = len(max(spStrings+midiinPorts+midioutPorts,key=len)) # length of longest combo box string.
+
+
+wc = font.measure(max(spStrings+midiinPorts+midioutPorts,key=len))# length of longest combo box string.
 scbString = 'ScanPorts'
 stbString = 'Start'
 exbString = 'Exit'
-wb = len(max([scbString, stbString, exbString],key=len)) # length of longest button string.
+wb = font.measure(max([scbString, stbString, exbString],key=len)) # length of longest button string.
 spText  = 'Serial port' # text of labels
-bdText  = 'baudrate'
+bdText  = 'Baudrate'
 s2mText = 'Serial to MIDI'
 m2sText = 'MIDI to Serial'
-lb = len(max([spText,bdText,s2mText,m2sText],key=len)) # length of longest label.
+lb = font.measure(max([spText,bdText,s2mText,m2sText],key=len)) # length of longest label.
 csize = (wc,1) # will be set correctly on create
 bsize = (wb,1)
 tsize = (lb,1)
@@ -191,85 +210,133 @@ spSettings  = 'SerialPortName' # names for UserSettings
 bdSettings  = 'Baudrate'
 s2mSettings = 'Serial2MidiName'
 m2sSettings = 'Midi2SerialName'
-spCombo  = sg.Combo(spStrings,    size=csize, default_value=sg.UserSettings().get(spSettings,''))
-bdCombo  = sg.Combo(bdValues,     size=csize, default_value=sg.UserSettings().get(bdSettings,''))
-s2mCombo = sg.Combo(midiinPorts,  size=csize, default_value=sg.UserSettings().get(s2mSettings,''))
-m2sCombo = sg.Combo(midioutPorts, size=csize, default_value=sg.UserSettings().get(m2sSettings,''))
+
+spCombo_var = customtkinter.StringVar(value=spStrings[0])
+spCombo  = customtkinter.CTkOptionMenu(app, values=spStrings, variable=spCombo_var, width=wc)
+
+bdCombo_var = customtkinter.StringVar(value=bdValues[0])
+bdValuesStr = [str(num) for num in bdValues]
+bdCombo  = customtkinter.CTkOptionMenu(app, values=bdValuesStr, variable=bdCombo_var, width=wc)
+
+s2mCombo_var = customtkinter.StringVar(value=midiinPorts[0])
+s2mCombo = customtkinter.CTkOptionMenu(app, values=midiinPorts, variable=s2mCombo_var, width=wc)
+
+m2sCombo_var = customtkinter.StringVar(value=midioutPorts[0])
+m2sCombo = customtkinter.CTkOptionMenu(app, values=midioutPorts, variable=m2sCombo_var, width=wc)
 scKey = '-SCAN-'
 stKey = '-START-'
 exKey = '-EXIT-'
-scButton = sg.Button(scbString, size=bsize, key=scKey, tooltip='Scan for Serial and MIDI ports')
-stButton = sg.Button(stbString, size=bsize, key=stKey, tooltip='Start/stop the Serial-MIDI bridging')
-exButton = sg.Button(exbString, size=bsize, key=exKey)
+
 # scan serial and midi ports and try to set the one already selected
 def scanports():
     setSerialPortnames()
     getMidiPorts()
     # set new values and make sure the Combos have equal widths
-    wc = len(max(spStrings+midiinPorts+midioutPorts,key=len)) # length of longest combo box string.
-    wcsize = (wc, None)
+    wc = font.measure(max(spStrings+midiinPorts+midioutPorts,key=len)) # length of longest combo box string.
     sel = spCombo.get()
-    spCombo.Update(values=spStrings, value=sel, size=wcsize)
-    bdCombo.Update(size=(wc, None))
+    spCombo.configure(values=spStrings, width=wc)
+    spCombo.set(sel)
+    bdCombo.configure(width=wc)
     sel = s2mCombo.get()
-    s2mCombo.Update(values=midiinPorts, value=sel, size=wcsize)
+    s2mCombo.configure(values=midiinPorts, width=wc)
+    s2mCombo.set(sel)
     sel = m2sCombo.get()
-    m2sCombo.Update(values=midioutPorts, value=sel, size=wcsize)
+    m2sCombo.configure(values=midioutPorts, width=wc)
+    m2sCombo.set(sel)
 
-layout = [[sg.Text(spText,  size=tsize), sg.Text(':'), spCombo],
-          [sg.Text(bdText,  size=tsize), sg.Text(':'), bdCombo],
-          [sg.Text(s2mText, size=tsize), sg.Text(':'), s2mCombo],
-          [sg.Text(m2sText, size=tsize), sg.Text(':'), m2sCombo],
-          [scButton, stButton, exButton]
-         ]
-enabled = False
-window  = sg.Window('Serial-MIDI bridge', layout, font=myfont) # make font a little bigger
-# Main event loop
-while True:
-    event, values = window.read()
-    if event == sg.WIN_CLOSED or event == exKey:
-        bridgeActive = False # stop the server
-        break
-    elif event == scKey:
-        scanports()
-    elif event == stKey:
-        if enabled:
-            stButton.update(text='Start')
-            enabled = False
-            scButton.update(disabled = False)
-            spCombo.update(disabled = False)
-            bdCombo.update(disabled = False)
-            s2mCombo.update(disabled = False)
-            m2sCombo.update(disabled = False)
+def exKey():
+    global bridgeActive  # Declare 'bridgeActive' as a global variable
+    bridgeActive = False # stop the server
+    app.destroy()
+
+def stKey():
+    global enabled  # Declare 'enabled' as a global variable
+
+    if enabled:
+        stButton.configure(text='Start')
+        enabled = False
+        scButton.configure(state="normal")
+        spCombo.configure(state="normal")
+        bdCombo.configure(state="normal")
+        s2mCombo.configure(state="normal")
+        m2sCombo.configure(state="normal")
+        spi  = spCombo.get()
+        bdi  = bdCombo.get()
+        s2mi = s2mCombo.get()
+        m2si = m2sCombo.get()
+        stopSerialMidiServer()
+    else:
+        try:
+            # check if all values are chosen
             spi  = spStrings.index(spCombo.get())
-            bdi  = bdValues.index(bdCombo.get())
+            bdi  = bdValues.index(int(bdCombo.get()))
             s2mi = midiinPorts.index(s2mCombo.get())
             m2si = midioutPorts.index(m2sCombo.get())
-            stopSerialMidiServer()
-        else:
-            try:
-                # check if all values are chosen
-                spi  = spStrings.index(spCombo.get())
-                bdi  = bdValues.index(bdCombo.get())
-                s2mi = midiinPorts.index(s2mCombo.get())
-                m2si = midioutPorts.index(m2sCombo.get())
-                # all values chosen, now start server
-                print('Starting: "'+spPortnames[spi]+'" "'+str(bdValues[bdi])+'" "'+midiinPorts[s2mi]+'" "'+midioutPorts[m2si]+'"')
-                ok = startSerialMidiServer(spPortnames[spi], bdValues[bdi], s2mi, m2si)
-                if ok:
-                    stButton.update(text='Stop')
-                    enabled = True
-                    scButton.update(disabled = True)
-                    spCombo.update(disabled = True)
-                    bdCombo.update(disabled = True)
-                    s2mCombo.update(disabled = True)
-                    m2sCombo.update(disabled = True)
-            except Exception as e:
-                popupError('Select all values\n'+str(e))
+            # all values chosen, now start server
+            print('Starting: "'+spPortnames[spi]+'" "'+str(bdValues[bdi])+'" "'+midiinPorts[s2mi]+'" "'+midioutPorts[m2si]+'"')
+            ok = startSerialMidiServer(spPortnames[spi], bdValues[bdi], s2mi, m2si)
+            if ok:
+                stButton.configure(text='Stop')
+                enabled = True
+                scButton.configure(state="disable")
+                spCombo.configure(state="disable")
+                bdCombo.configure(state="disable")
+                s2mCombo.configure(state="disable")
+                m2sCombo.configure(state="disable")
+        except Exception as e:
+            popupError('Select all values\n'+str(e))
+
+scButton = customtkinter.CTkButton(app, text=scbString, width=wb, height=1)
+scButton.configure(command=scanports)
+stButton = customtkinter.CTkButton(app, text=stbString, width=wb, height=1, command=stKey)
+exButton = customtkinter.CTkButton(app, text=exbString, width=wb, height=1, command=exKey)
+
+app.title('Serial-MIDI bridge')
+app.columnconfigure((0,1,2), weight = 1)
+app.rowconfigure((0,1,2,3,4), weight = 1)
+
+#Serial Ports
+label_sp = customtkinter.CTkLabel(app, text=spText)
+label_sp.grid(row=0, column=0, padx=20, pady=20, sticky='w')
+label_spn = customtkinter.CTkLabel(app, text=':')
+label_spn.grid(row=0, column=1)
+spCombo.grid(row=0, column=2, padx=20, pady=20)
+
+#Baud Rate
+label_bd = customtkinter.CTkLabel(app, text=bdText)
+label_bd.grid(row=1, column=0, padx=20, pady=20, sticky='w')
+label_bdn = customtkinter.CTkLabel(app, text=':')
+label_bdn.grid(row=1, column=1)
+bdCombo.grid(row=1, column=2, padx=20, pady=20)
+
+#Serial To Midi
+label_s2m = customtkinter.CTkLabel(app, text=s2mText)
+label_s2m.grid(row=2, column=0, padx=20, pady=20, sticky='w')
+label_s2mn = customtkinter.CTkLabel(app, text=':')
+label_s2mn.grid(row=2, column=1)
+s2mCombo.grid(row=2, column=2, padx=20, pady=20)
+
+#Midi to Serial
+label_m2s = customtkinter.CTkLabel(app, text=m2sText)
+label_m2s.grid(row=3, column=0, padx=20, pady=20, sticky='w')
+label_m2sn = customtkinter.CTkLabel(app, text=':')
+label_m2sn.grid(row=3, column=1)
+m2sCombo.grid(row=3, column=2, padx=20, pady=20)
+
+#Buttons
+scButton.grid(row=4, column=0, padx=20, pady=20)
+stButton.grid(row=4, column=1, padx=20, pady=20)
+exButton.grid(row=4, column=2, padx=20, pady=20)
+
+
+# Main event loop
+enabled = False
+app.mainloop()
+
 
 # Save selected values for next time
-sg.user_settings_set_entry(spSettings,  spCombo.get())
-sg.user_settings_set_entry(bdSettings,  bdCombo.get())
-sg.user_settings_set_entry(s2mSettings, s2mCombo.get())
-sg.user_settings_set_entry(m2sSettings, m2sCombo.get())
-window.close()
+#sg.user_settings_set_entry(spSettings,  spCombo.get())
+#sg.user_settings_set_entry(bdSettings,  bdCombo.get())
+#sg.user_settings_set_entry(s2mSettings, s2mCombo.get())
+#sg.user_settings_set_entry(m2sSettings, m2sCombo.get())
+
