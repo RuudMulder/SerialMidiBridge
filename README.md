@@ -1,6 +1,6 @@
 ### Notification:
 
-The development on this branch has stopped. Development continues (with a more modern GUI that will work on new MacOs versions) on: [https://github.com/chava100f/SerialMidiBridge(https://github.com/chava100f/SerialMidiBridge).
+The development on this branch has stopped. Development continues (with a more modern GUI that will work on new MacOs versions) on: [https://github.com/chava100f/SerialMidiBridge](https://github.com/chava100f/SerialMidiBridge).
 
 ### SerialMidiBridge
 
