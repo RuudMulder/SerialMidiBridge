@@ -1,5 +1,7 @@
 ### SerialMidiBridge
 
+The development on this branch has stopped. Development continues (with a more modern GUI that will work on new MacOs versions) on: [https://github.com/chava100f/SerialMidiBridge(https://github.com/chava100f/SerialMidiBridge).
+
 This is a replacement for [https://github.com/projectgus/hairless-midiserial](https://github.com/projectgus/hairless-midiserial) that stopped working with OS X Catalina.
 
 It is based on the excellent [serialmidi](https://github.com/raspy135/serialmidi) python script. I just refactored it a bit to be able to add a Gui.
