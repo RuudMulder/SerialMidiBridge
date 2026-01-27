@@ -1,3 +1,9 @@
+# Serial MIDI Bridge (Apple Silicon)
+
+A Python application that bridges **Serial (e.g. Arduino / electronic drums)** and **MIDI**, featuring a **Tkinter-based GUI** and full compatibility with **macOS Apple Silicon (M1 / M2 / M3)**.
+
+---
+
 ### SerialMidiBridge
 
 This is a replacement for [https://github.com/projectgus/hairless-midiserial](https://github.com/projectgus/hairless-midiserial) that stopped working with OS X Catalina.
@@ -8,46 +14,68 @@ It is based on the excellent [serialmidibridge](https://github.com/chava100f/Ser
 
 After starting you will be able to choose the serial port, baudrate, serial-to-midi port and midi-to-serial port. The Scan button will re-scan for available serial and midi ports. Your selection is remembered for next usage. After starting the server no changes can be made until the server is stopped.
 
-### Starting from the command line
 
-### Required libs (step by step on Mac)
+## 📦 System Requirements
 
-```
-brew install python@3.11
-```
-```
-brew install rtmidi pkg-config
-```
-```
-brew install pyserial
-```
+* macOS 12+ (Monterey or newer)
+* **Apple Silicon** processor (M1, M2, M3)
+* Python **3.10 or newer** (recommended: 3.11)
+* Xcode Command Line Tools
 
-In case of graphical issues:
-```
-brew install python-tk
-```
+---
 
-After install dependencies you can install the serial midi bridge using the following command:
+## 🐍 Python
 
-```
-python3 main.py
+Check your Python version:
+
+```bash
+python3 --version
 ```
 
-### Adapting/building
+If needed, install or upgrade Python using **Homebrew**:
 
-If you want to make changes or build your own application you can use pyinstaller:
-
-```
-pyinstaller --onefile --windowed SerialMidiBridge.py
+```bash
+brew install python
 ```
 
-N.B. pyinstaller can be installed as follows:
+---
 
-```
-pip install pyinstaller
+## 🛠 System Dependencies (Required)
+
+Install the native libraries required for MIDI and Serial support:
+
+```bash
+brew install portmidi
+brew install pkg-config
 ```
 
-You are free to modify it as long as it's not for commercial purposes.
+> ⚠️ `portmidi` is required for `python-rtmidi` to work correctly on Apple Silicon.
+
+---
+
+## 📦 Python Dependencies
+
+It is **strongly recommended** to use a virtual environment:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Upgrade `pip`:
+
+```bash
+pip install --upgrade pip
+```
+
+Install the required Python packages:
+
+```bash
+pip install pyserial python-rtmidi
+```
+
+> ❗ **Do NOT use** `--no-binary` on Apple Silicon. Precompiled wheels are available
+
 
 ### Notes
 
