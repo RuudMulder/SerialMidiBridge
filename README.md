@@ -20,11 +20,9 @@ brew install rtmidi pkg-config
 
 ```
 ```
-pip3 install pyserial
+brew install pyserial
 ```
-```
-pip3 install PySimpleGUI
-```
+
 In case of graphical issues:
 ```
 brew install python-tk

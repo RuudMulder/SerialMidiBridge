@@ -1,47 +1,65 @@
 # ui.py
-import PySimpleGUI as sg
+import tkinter as tk
+from tkinter import ttk, messagebox
 import serial.tools.list_ports
 import rtmidi
-from config import APP_NAME, FONT
 
 
 class BridgeUI:
     def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Serial-MIDI Bridge")
+
         self.midi_in = rtmidi.MidiIn()
         self.midi_out = rtmidi.MidiOut()
 
-        self.serial_ports = []
-        self.midi_in_ports = []
-        self.midi_out_ports = []
-
-        self.window = self._create_window()
+        self._build()
         self.scan_ports()
 
-    def _create_window(self):
-        layout = [
-            [sg.Text("Serial Port"), sg.Combo([], key="-SERIAL-", size=(40, 1))],
-            [sg.Text("Baudrate"), sg.Combo([9600, 19200, 31250, 57600, 115200],
-                                           default_value=31250, key="-BAUD-")],
-            [sg.Text("MIDI In"), sg.Combo([], key="-MIDI-IN-", size=(40, 1))],
-            [sg.Text("MIDI Out"), sg.Combo([], key="-MIDI-OUT-", size=(40, 1))],
-            [sg.Button("Scan"), sg.Button("Start"), sg.Button("Exit")]
-        ]
+    def _build(self):
+        self.serial_var = tk.StringVar()
+        self.baud_var = tk.IntVar(value=31250)
+        self.midi_in_var = tk.StringVar()
+        self.midi_out_var = tk.StringVar()
 
-        return sg.Window(APP_NAME, layout, font=FONT)
+        ttk.Label(self.root, text="Serial Port").grid(row=0, column=0, sticky="w")
+        self.serial_cb = ttk.Combobox(self.root, textvariable=self.serial_var, width=40)
+        self.serial_cb.grid(row=0, column=1)
+
+        ttk.Label(self.root, text="Baudrate").grid(row=1, column=0, sticky="w")
+        self.baud_cb = ttk.Combobox(
+            self.root,
+            values=[9600, 19200, 31250, 57600, 115200],
+            textvariable=self.baud_var,
+        )
+        self.baud_cb.grid(row=1, column=1)
+
+        ttk.Label(self.root, text="MIDI In").grid(row=2, column=0, sticky="w")
+        self.midi_in_cb = ttk.Combobox(self.root, textvariable=self.midi_in_var, width=40)
+        self.midi_in_cb.grid(row=2, column=1)
+
+        ttk.Label(self.root, text="MIDI Out").grid(row=3, column=0, sticky="w")
+        self.midi_out_cb = ttk.Combobox(self.root, textvariable=self.midi_out_var, width=40)
+        self.midi_out_cb.grid(row=3, column=1)
+
+        self.start_btn = ttk.Button(self.root, text="Start")
+        self.start_btn.grid(row=4, column=0)
+
+        self.scan_btn = ttk.Button(self.root, text="Scan")
+        self.scan_btn.grid(row=4, column=1)
+
+        self.exit_btn = ttk.Button(self.root, text="Exit", command=self.root.quit)
+        self.exit_btn.grid(row=4, column=2)
 
     def scan_ports(self):
-        self.serial_ports = list(serial.tools.list_ports.comports())
+        serial_ports = [p.device for p in serial.tools.list_ports.comports()]
+        self.serial_cb["values"] = serial_ports
+
         self.midi_in_ports = self.midi_in.get_ports()
         self.midi_out_ports = self.midi_out.get_ports()
 
-        self.window["-SERIAL-"].update(
-            values=[p.device for p in self.serial_ports]
-        )
-        self.window["-MIDI-IN-"].update(values=self.midi_in_ports)
-        self.window["-MIDI-OUT-"].update(values=self.midi_out_ports)
+        self.midi_in_cb["values"] = self.midi_in_ports
+        self.midi_out_cb["values"] = self.midi_out_ports
 
-    def read(self):
-        return self.window.read()
-
-    def close(self):
-        self.window.close()
+    def run(self):
+        self.root.mainloop()
