@@ -1,6 +1,10 @@
-# Serial MIDI Bridge (Apple Silicon)
+# Serial MIDI Bridge for Apple Silicon Valley
 
 A Python application that bridges **Serial (e.g. Arduino / electronic drums)** and **MIDI**, featuring a **Tkinter-based GUI** and full compatibility with **macOS Apple Silicon (M1 / M2 / M3)**.
+
+NOTE: I've only tested this application on apple silicon valley (M1), so I can't say for sure this is compatible with other OS sytems or another chipsets.
+
+**This is a beta version and it's opened to any community contribution**
 
 ---
 
