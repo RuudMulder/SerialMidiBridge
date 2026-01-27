@@ -15,9 +15,8 @@ After starting you will be able to choose the serial port, baudrate, serial-to-m
 ```
 brew install python@3.11
 ```
-brew update
+```
 brew install rtmidi pkg-config
-
 ```
 ```
 brew install pyserial
