@@ -1,19 +1,8 @@
-### Notification:
-
-The development on this branch has stopped. Development continues (with a more modern GUI that will work on new MacOs versions) on: [https://github.com/chava100f/SerialMidiBridge](https://github.com/chava100f/SerialMidiBridge).
-
 ### SerialMidiBridge
 
 This is a replacement for [https://github.com/projectgus/hairless-midiserial](https://github.com/projectgus/hairless-midiserial) that stopped working with OS X Catalina.
 
-It is based on the excellent [serialmidi](https://github.com/raspy135/serialmidi) python script. I just refactored it a bit to be able to add a Gui.
-
-Not as fancy as hairless-midiserial, but it works and is for end-users easier to use than the serialmidi script (I know at least one of them :wink:).
-
-A complete application for OS X can be downloaded from: [SerialMidiBridge.app.zip](https://mega.nz/file/k5skCQqL#Gu-krXfbGkKWxxRzex5TsaKGbu9fc9izKQyb72-ZagA).
-
-It also works on Linux (at least on Lubuntu19). A complete application for Linux can be downloaded from:
-[SerialMidiBridgeLinux.zip](https://mega.nz/file/Ug9h1QTB#_gvN7DPf7y9jejG2K-4btN61jieIyUxwtCvAK9iOorQ)
+It is based on the excellent [serialmidibridge](https://github.com/chava100f/SerialMidiBridge) python script. I just refactored it a bit to make it compatible with Apple Silicon.
 
 ### Usage
 
@@ -21,16 +10,30 @@ After starting you will be able to choose the serial port, baudrate, serial-to-m
 
 ### Starting from the command line
 
-It can also be started in the Terminal after downloading the python script as follows:
+### Required libs (step by step on Mac)
 
 ```
-python3 SerialMidiBridge.py
+brew install python@3.11
+```
+brew update
+brew install rtmidi pkg-config
+
+```
+```
+pip3 install pyserial
+```
+```
+pip3 install PySimpleGUI
+```
+In case of graphical issues:
+```
+brew install python-tk
 ```
 
-This requires some python extra packages. You can install them as follows:
+After install dependencies you can install the serial midi bridge using the following command:
 
 ```
-pip install pyserial python-rtmidi pysimplegui
+python3 main.py
 ```
 
 ### Adapting/building
