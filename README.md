@@ -1,5 +1,7 @@
 ### Notification:
 
+This stopped working on Macos version 26 (with ARM-architecture) due to problems with python-rtmidi. I managed to get a version working. The new OS X application can be downloaded from [SerialMidiBridgeArm.zip](https://mega.nz/file/toNXgb4a#dVQsfQS0G-pQ39ikt4GwAvNDv8l4hEMYx7TxhCb6MHg).
+
 The development on this branch has stopped. Development continues (with a more modern GUI that will work on new MacOs versions) on: [https://github.com/chava100f/SerialMidiBridge](https://github.com/chava100f/SerialMidiBridge).
 
 ### SerialMidiBridge
